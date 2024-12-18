@@ -7,13 +7,13 @@ public class GenericSynchronizedQueueImpl<T> implements GenericSynchronizedQueue
     Set<T> visited;
     Queue<T> q;
 
-    Semaphore semaphore;
+    Semaphore qLock;
     AtomicInteger runningTasks;
 
     public GenericSynchronizedQueueImpl() {
         this.visited = Collections.synchronizedSet(new HashSet<>());
         this.q = new LinkedList<>();
-        semaphore = new Semaphore(1);
+        qLock = new Semaphore(1);
         runningTasks = new AtomicInteger();
     }
 
@@ -22,13 +22,13 @@ public class GenericSynchronizedQueueImpl<T> implements GenericSynchronizedQueue
     public boolean offer(T obj) {
 
         try {
-            semaphore.acquire();
+            qLock.acquire();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         q.offer(obj);
         visited.add(obj);
-        semaphore.release();
+        qLock.release();
 
         return true;
 
@@ -39,14 +39,14 @@ public class GenericSynchronizedQueueImpl<T> implements GenericSynchronizedQueue
     public T poll() {
 
         try {
-            semaphore.acquire();
+            qLock.acquire();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
 
         T top = q.poll();
 
-        semaphore.release();
+        qLock.release();
         return top;
 
     }
